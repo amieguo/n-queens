@@ -115,6 +115,14 @@ window.countNRooksSolutions = function(n) {
 window.findNQueensSolution = function(n) {
   var solution = undefined; //fixme
   var emptyMatrix = window.makeEmptyMatrix(n);
+  var makeEmptyMask = function(n) {
+    return _(_.range(n)).map(function() {
+      return _(_.range(n)).map(function() {
+        return true;
+      });
+    });
+  };
+  var mask = makeEmptyMask(n);
   
   var hasConflictAt = function(arr) {
     var sumArray = (elem, sum) => elem + sum;      
@@ -166,12 +174,43 @@ window.findNQueensSolution = function(n) {
     return !result;
   }
   
-  var findSol = function(matrix) {
+  var isDiagonal = function(x1, y1, x2, y2) {
+    var xdiff =  x2 - x1 ;
+    var ydiff =  y2 - y1;
+    if (xdiff === ydiff) {
+      return true;
+    } else if (xdiff === -ydiff) {
+      return true;
+    } else {
+      return false
+    }
+  }
+
+  var makeMask = function(x, y, matrix) {
+    var copyMatrix = matrix.map(function (arr) {
+      return arr.slice();
+    });
+    
+    for (var i = 0; i < copyMatrix.length; i++) {
+      for (var j = 0; j < copyMatrix.length; j++) {
+        if (i === x || j === y || isDiagonal(i,j,x,y)) {
+          copyMatrix[i][j] = false;
+        }
+      }
+    }
+    
+    return copyMatrix;
+  }
+  
+  var findSol = function(matrix, mask) {
     // loop through all spaces
     for (var i = 0; i < matrix.length; i++) {
       for (var j = 0; j < matrix.length; j++) {
         // make copy of matrix
         var copyMatrix = matrix.map(function (arr) {
+          return arr.slice();
+        });
+        var copyMask = mask.map(function (arr) {
           return arr.slice();
         });
         // place piece if the space is empty
@@ -187,6 +226,7 @@ window.findNQueensSolution = function(n) {
                 return memo + col;
               }, 0);
             }, 0);
+            // if we have a solution
             if (numPieces === matrix.length) {
               // return the copy of the matrix
               return copyMatrix;
@@ -216,6 +256,8 @@ window.findNQueensSolution = function(n) {
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
   var solutionCount = undefined; //fixme
+  // optimization ideas:
+  // for the first piece, we only need to place it in the first half for first row.
   
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
