@@ -122,7 +122,7 @@ window.findNQueensSolution = function(n) {
       });
     });
   };
-  var mask = makeEmptyMask(n);
+  var emptyMask = makeEmptyMask(n);
   
   var hasConflictAt = function(arr) {
     var sumArray = (elem, sum) => elem + sum;      
@@ -207,46 +207,48 @@ window.findNQueensSolution = function(n) {
     for (var i = 0; i < matrix.length; i++) {
       for (var j = 0; j < matrix.length; j++) {
         // make copy of matrix
-        var copyMatrix = matrix.map(function (arr) {
+        let copyMatrix = matrix.map(function (arr) {
           return arr.slice();
         });
-        var copyMask = mask.map(function (arr) {
+        let copyMask = mask.map(function (arr) {
           return arr.slice();
         });
         // place piece if the space is empty
-        if (copyMatrix[i][j] === 0) {
+        if (copyMask[i][j]) {
           copyMatrix[i][j] = 1;
-          // check if copy of matrix still valid, 
-          var isValid = checkIfValid(copyMatrix);
-          // if it is still valid: 
-          if (isValid) {
-            // if numPieces === n (aka numGood)
-            var numPieces = _.reduce(copyMatrix, function(memo, row) {
-              return memo + _.reduce(row, function(memo, col) {
-                return memo + col;
-              }, 0);
+          copyMask = makeMask(i, j, copyMask);
+        } 
+        // check if copy of matrix still valid, 
+        // var isValid = checkIfValid(copyMatrix);
+        // if it is still valid: 
+        if (true) {
+          // if numPieces === n (aka numGood)
+          var numPieces = _.reduce(copyMatrix, function(memo, row) {
+            return memo + _.reduce(row, function(memo, col) {
+              return memo + col;
             }, 0);
-            // if we have a solution
-            if (numPieces === matrix.length) {
-              // return the copy of the matrix
-              return copyMatrix;
-            } else {
-              // else result = helper function on the copy of matrix 
-              var result = findSol(copyMatrix);
-              // if result !== undefined 
-              if (result !== undefined) {
-                // return the result
-                return result;
-              }
+          }, 0);
+          // if we have a solution
+          if (numPieces === matrix.length) {
+            // return the copy of the matrix
+            return copyMatrix;
+          } else if (copyMask.some(row => row.some(x => x))) { // check if there are any valid spots still
+            // else result = helper function on the copy of matrix 
+            var result = findSol(copyMatrix, copyMask);
+            // if result !== undefined 
+            if (result !== undefined) {
+              // return the result
+              return result;
             }
           }
         }
+
       // else, no nothing
       }
     }
   }
   
-  solution = findSol(emptyMatrix);
+  solution = findSol(emptyMatrix, emptyMask);
   solution = solution || emptyMatrix;
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
